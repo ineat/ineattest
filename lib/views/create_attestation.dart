@@ -5,12 +5,16 @@ import 'package:ineattest/extensions/i18n.dart';
 import 'package:ineattest/model/attestation.dart';
 import 'package:ineattest/preferences/preferences.dart';
 import 'package:ineattest/views/attestation_viewer.dart';
+import 'package:ineattest/views/divider.dart';
 import 'package:ineattest/views/progress.dart';
 import 'package:ineattest/views/signature.dart';
 
 class CreateAttestation extends HookWidget {
+  // keys
   final _formKey = GlobalKey<FormState>();
   final _reasonGroupKey = GlobalKey();
+
+  // focus node
   final FocusNode _nameFocus = FocusNode();
   final FocusNode _birthdayFocus = FocusNode();
   final FocusNode _birthplaceFocus = FocusNode();
@@ -18,6 +22,7 @@ class CreateAttestation extends HookWidget {
   final FocusNode _cityFocus = FocusNode();
   final FocusNode _zipcodeFocus = FocusNode();
 
+  // RegExp
   final nameRegExp = RegExp(r"([^ ]{3,}) ([^ ]{3,})");
   final birthdayRegExp = RegExp(r"[0-9]{2}\/[0-9]{2}\/[0-9]{4}");
 
@@ -48,15 +53,6 @@ class CreateAttestation extends HookWidget {
       return null;
     }, [attestationSnapshot]);
 
-//    useValueChanged(attestationSnapshot, (_, __) {
-//      nameTextEditingController.text = attestationSnapshot?.data?.name;
-//      addressEditingController.text = attestationSnapshot?.data?.address;
-//      cityEditingController.text = attestationSnapshot?.data?.city;
-//      zipEditingController.text = attestationSnapshot?.data?.zip;
-//      birthdayEditingController.text = attestationSnapshot?.data?.birthday;
-//      birthplaceEditingController.text = attestationSnapshot?.data?.birthplace;
-//      reasonState.value = attestationSnapshot?.data?.reason;
-//    });
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
@@ -78,9 +74,7 @@ class CreateAttestation extends HookWidget {
         ],
       ),
       body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).requestFocus(FocusNode());
-        },
+        onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
         child: Builder(builder: (context) {
           if (attestationSnapshot.connectionState != ConnectionState.done) {
             return Progress();
@@ -169,12 +163,12 @@ class CreateAttestation extends HookWidget {
                     focusNode: _zipcodeFocus,
                     onFieldSubmitted: (_) => _nextFocus(context, _zipcodeFocus, null),
                   ),
-                  _FormDivider(),
+                  Divider16(),
                   Text(
                     "create-attestation.choose-reason".translate(context),
                     style: Theme.of(context).textTheme.subhead,
                   ),
-                  _FormDivider(),
+                  Divider16(),
                   ListView.separated(
                     key: _reasonGroupKey,
                     primary: false,
@@ -193,25 +187,24 @@ class CreateAttestation extends HookWidget {
                         selectedReason: reasonState,
                       );
                     },
-                    separatorBuilder: (_, __) => SizedBox(height: 12.0),
+                    separatorBuilder: (_, __) => Divider12(),
                     itemCount: AttestationReason.values.length,
                   ),
-                  SizedBox(height: 12.0),
+                  Divider12(),
                   Text(
                     "create-attestation.signature".translate(context),
                     style: Theme.of(context).textTheme.subhead,
                   ),
-                  _FormDivider(),
+                  Divider16(),
                   AspectRatio(
                     aspectRatio: 1,
                     child: Signature(),
                   ),
-                  _FormDivider(),
+                  Divider16(),
                   FlatButton(
                     child: Text("action.validate".translate(context), style: TextStyle(color: Colors.white)),
                     color: Theme.of(context).accentColor,
                     onPressed: () async {
-
                       final displaySnackbarError = (String keyError) {
                         Scaffold.of(context).showSnackBar(SnackBar(
                           content: Text(keyError.translate(context)),
@@ -260,7 +253,10 @@ class CreateAttestation extends HookWidget {
                       );
 
                       Preferences.saveAttestation(attestation).then((_) {
-                        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => AttestationViewer()), ModalRoute.withName("/"));
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => AttestationViewer()),
+                          ModalRoute.withName("/"),
+                        );
                       });
                     },
                   ),
@@ -356,12 +352,5 @@ class _ReasonTile extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _FormDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(height: 16.0);
   }
 }

@@ -1,8 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ineattest/extensions/i18n.dart';
 import 'package:ineattest/preferences/preferences.dart';
 import 'package:ineattest/views/progress.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signature/signature.dart' as signature;
 
 class Signature extends HookWidget {
@@ -38,13 +38,11 @@ class Signature extends HookWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Expanded(
-                            flex: 1,
                             child: Container(
-                                padding: const EdgeInsets.only(bottom: 24.0),
-                                alignment: Alignment.bottomCenter,
-                                child: Text(
-                                  "signature.create".translate(context),
-                                )),
+                              padding: const EdgeInsets.only(bottom: 24.0),
+                              alignment: Alignment.bottomCenter,
+                              child: Text("signature.create".translate(context)),
+                            ),
                           ),
                           Expanded(
                             child: Image.asset(

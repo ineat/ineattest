@@ -1,45 +1,45 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart' as material;
 import 'package:flutter/services.dart';
 import 'package:ineattest/extensions/dateTime.dart';
 import 'package:ineattest/extensions/i18n.dart';
 import 'package:ineattest/model/attestation.dart';
 import 'package:ineattest/preferences/preferences.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:printing/printing.dart';
 
 class PdfGenerator {
-  Document pdf;
   Attestation attestation;
 
   PdfGenerator(Attestation _attestation) {
     attestation = _attestation;
   }
 
-  PdfImage checkedImage;
-  PdfImage uncheckedImage;
-
-  PdfImage signatureImage;
-
-  Future<void> generatePDF(material.BuildContext buildContext) async {
-    pdf = Document(
-        theme: Theme.withFont(
-      base: Font.ttf(await rootBundle.load("assets/arial.ttf")),
-      bold: Font.ttf(await rootBundle.load("assets/arial.ttf")),
-      italic: Font.ttf(await rootBundle.load("assets/arial.ttf")),
-      boldItalic: Font.ttf(await rootBundle.load("assets/arial.ttf")),
-    ).copyWith(defaultTextStyle: TextStyle(fontSize: 11)));
-    checkedImage = await pdfImageFromImageProvider(
+  Future<File> generatePDF(material.BuildContext buildContext) async {
+    final fontByteData = await rootBundle.load("assets/arial.ttf");
+    final font = Font.ttf(fontByteData);
+    final pdf = Document(
+      theme: Theme.withFont(
+        base: font,
+        bold: font,
+        italic: font,
+        boldItalic: font,
+      ).copyWith(defaultTextStyle: TextStyle(fontSize: 11)),
+    );
+    final checkedImage = await pdfImageFromImageProvider(
       pdf: pdf.document,
       image: material.AssetImage('assets/checked.png'),
     );
 
-    uncheckedImage = await pdfImageFromImageProvider(
+    final uncheckedImage = await pdfImageFromImageProvider(
       pdf: pdf.document,
       image: material.AssetImage('assets/unchecked.png'),
     );
-    var sig = await Preferences.getSignatureImage();
-    signatureImage = await pdfImageFromImageProvider(pdf: pdf.document, image: material.MemoryImage(sig));
+    final sig = await Preferences.getSignatureImage();
+    final signatureImage = await pdfImageFromImageProvider(pdf: pdf.document, image: material.MemoryImage(sig));
 
     pdf.addPage(
       Page(
@@ -91,24 +91,37 @@ class PdfGenerator {
                 Text(
                   "viewer-attestation.check-in".translate(buildContext, translationParams: {
                     "city": attestation.city,
-                    "date": DateTime.now().formatDmyHm(),
+                    "date": attestation.createdAt.formatDmyHm(),
                   }),
                 ),
                 SizedBox(height: 12.0),
                 SizedBox(
                   child: Image(signatureImage),
-                  width: 125,
-                  height: 125,
+                  width: 90,
+                  height: 90,
                 ),
                 SizedBox(height: 4.0),
-                for(var index = 1; index <= 3; index++) Text('viewer-attestation.nota-bene.nb-${index}'.translate(buildContext)),
+                for (var index = 1; index <= 3; index++) Text('viewer-attestation.nota-bene.nb-$index'.translate(buildContext), style: TextStyle(fontSize: 8)),
               ],
             ),
           );
         },
       ),
     );
+
+    final directory = await getApplicationDocumentsDirectory();
+    final File file = File('${directory.path}/attestation.pdf');
+    file.writeAsBytesSync(pdf.save());
+    return file;
   }
+
+  Future<String> get getLocalPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    // For your reference print the AppDoc directory
+    print(directory.path);
+    return directory.path;
+  }
+
 }
 
 class _ReasonWhy extends StatelessWidget {
@@ -134,7 +147,10 @@ class _ReasonWhy extends StatelessWidget {
         SizedBox(
           width: 20,
           height: 20,
-          child: Image((reason == attestation.reason) ? checkedImage : uncheckedImage, fit: BoxFit.scaleDown),
+          child: Image(
+            (reason == attestation.reason) ? checkedImage : uncheckedImage,
+            fit: BoxFit.scaleDown,
+          ),
         ),
         SizedBox(
           width: 12.0,

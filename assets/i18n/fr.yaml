@@ -18,8 +18,8 @@ create-attestation:
     voluntary: "Missions d’intérêt général"
   error:
     sir-madam: "Veuillez saisir votre nom et prénom"
-    born-the: "Veuillez saisir une date de naissance"
-    born-in: "Veuillez saisir un lieu de naissance"
+    born-the: "Veuillez saisir votre date de naissance"
+    born-in: "Veuillez saisir votre lieu de naissance"
     address: "Veuillez saisir votre addresse"
     city: "Veuillez saisir votre ville"
     zip-code: "Veuillez saisir votre code postal"
