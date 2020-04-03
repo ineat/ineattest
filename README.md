@@ -1,5 +1,5 @@
 # Ine'attest
-A l'heure où nous créons cette application (18/03/2020), un document présenté sous smartphone n'est malheureusement plus valide selon le gouvernement. 
+A l'heure où nous créons cette application (03/04/2020), un document présenté sous smartphone n'est malheureusement plus valide selon le gouvernement. 
 Vous devez donc imprimer (bouton partager qui vous fournira un PDF) l'attestation pour la présenter en cas de contrôle.
 
 # Les écrans
