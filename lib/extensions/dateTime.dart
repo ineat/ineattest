@@ -1,11 +1,11 @@
 import 'package:intl/intl.dart';
 
-final _dateFormat = DateFormat('dd/MM/yyyy');
+final _dateFormat = DateFormat("dd/MM/yyyy - HH'h'mm");
 
 extension DateTimeFormat on DateTime {
-  String formatDDMMYYY() => _dateFormat.format(this);
+  String formatDmyHm() => _dateFormat.format(this);
 }
 
 extension DateTimeParser on String {
-  DateTime parseDDMMYYYY() => _dateFormat.parse(this);
+  DateTime parseDmyHm() => _dateFormat.parse(this);
 }

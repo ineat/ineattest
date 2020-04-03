@@ -31,7 +31,7 @@ class AttestationViewer extends HookWidget {
             ),
           ),
         ),
-        title: Text("IneAttest"),
+        title: Text("Ine'attest"),
       ),
       body: GestureDetector(
         onTap: () {
@@ -45,7 +45,7 @@ class AttestationViewer extends HookWidget {
               );
             }
 
-            return AttestationContent(
+            return _AttestationContent(
               attestation: attestationSnapshot.data,
             );
           },
@@ -113,10 +113,10 @@ class AttestationViewer extends HookWidget {
   }
 }
 
-class AttestationContent extends StatelessWidget {
+class _AttestationContent extends StatelessWidget {
   final Attestation attestation;
 
-  const AttestationContent({Key key, @required this.attestation}) : super(key: key);
+  const _AttestationContent({Key key, @required this.attestation}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -141,42 +141,29 @@ class AttestationContent extends StatelessWidget {
             Text("viewer-attestation.certify-on-honor".translate(context, translationParams: {
               "name": attestation.name,
               "birthday": attestation.birthday,
+              "birthplace": attestation.birthplace,
               "address": attestation.address,
               "city": attestation.city,
               "zip": attestation.zip,
             })),
             _MediumDivider(),
-            ReasonWhy(
-              attestation: attestation,
-              reason: AttestationReason.work,
+            ListView.separated(
+              primary: false,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return ReasonWhy(
+                  attestation: attestation,
+                  reason: AttestationReason.values[index],
+                );
+              },
+              itemCount: AttestationReason.values.length,
+              separatorBuilder: (context, index) => _SmallDivider(),
             ),
-            _SmallDivider(),
-            ReasonWhy(
-              attestation: attestation,
-              reason: AttestationReason.food,
-            ),
-            _SmallDivider(),
-            ReasonWhy(
-              attestation: attestation,
-              reason: AttestationReason.health,
-            ),
-            _SmallDivider(),
-            ReasonWhy(
-              attestation: attestation,
-              reason: AttestationReason.family,
-            ),
-            _SmallDivider(),
-            ReasonWhy(
-              attestation: attestation,
-              reason: AttestationReason.sport,
-            ),
-            SizedBox(
-              height: 36.0,
-            ),
+            SizedBox(height: 36.0),
             Text(
               "viewer-attestation.check-in".translate(context, translationParams: {
                 "city": attestation.city,
-                "date": DateTime.now().formatDDMMYYY(),
+                "date": attestation.createdAt.formatDmyHm(),
               }),
               textAlign: TextAlign.right,
             ),
@@ -186,6 +173,15 @@ class AttestationContent extends StatelessWidget {
               child: Signature(
                 editable: false,
               ),
+            ),
+            SizedBox(height: 36.0),
+            ListView.separated(
+              padding: const EdgeInsets.only(bottom: 96.0),
+              primary: false,
+              shrinkWrap: true,
+              itemBuilder: (context, index) => Text('viewer-attestation.nota-bene.nb-${index + 1}'.translate(context)),
+              separatorBuilder: (context, index) => Divider(color: Colors.transparent),
+              itemCount: 3,
             ),
           ],
         ),

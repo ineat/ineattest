@@ -11,6 +11,9 @@ class Preferences {
 
   Preferences._();
 
+  static Future<bool> hasSignature() async {
+    return (await getSignatureImage()) != null;
+  }
   static Future<Uint8List> getSignatureImage() async {
     final preferences = await SharedPreferences.getInstance();
     final String signatureBase64 = preferences.getString(_signatureImageKey);

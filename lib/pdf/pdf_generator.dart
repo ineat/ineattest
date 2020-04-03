@@ -1,9 +1,9 @@
+import 'package:flutter/material.dart' as material;
+import 'package:flutter/services.dart';
 import 'package:ineattest/extensions/dateTime.dart';
 import 'package:ineattest/extensions/i18n.dart';
 import 'package:ineattest/model/attestation.dart';
 import 'package:ineattest/preferences/preferences.dart';
-import 'package:flutter/material.dart' as material;
-import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:printing/printing.dart';
@@ -23,13 +23,12 @@ class PdfGenerator {
 
   Future<void> generatePDF(material.BuildContext buildContext) async {
     pdf = Document(
-      theme: Theme.withFont(
-        base: Font.ttf(await rootBundle.load("assets/arial.ttf")),
-        bold: Font.ttf(await rootBundle.load("assets/arial.ttf")),
-        italic: Font.ttf(await rootBundle.load("assets/arial.ttf")),
-        boldItalic: Font.ttf(await rootBundle.load("assets/arial.ttf")),
-      ),
-    );
+        theme: Theme.withFont(
+      base: Font.ttf(await rootBundle.load("assets/arial.ttf")),
+      bold: Font.ttf(await rootBundle.load("assets/arial.ttf")),
+      italic: Font.ttf(await rootBundle.load("assets/arial.ttf")),
+      boldItalic: Font.ttf(await rootBundle.load("assets/arial.ttf")),
+    ).copyWith(defaultTextStyle: TextStyle(fontSize: 11)));
     checkedImage = await pdfImageFromImageProvider(
       pdf: pdf.document,
       image: material.AssetImage('assets/checked.png'),
@@ -51,81 +50,58 @@ class PdfGenerator {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Text(
-                  "viewer-attestation.title".translate(buildContext),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                SizedBox(height: 12.0),
-                Text("viewer-attestation.decree-application".translate(buildContext)),
-                SizedBox(height: 24.0),
-                Text("viewer-attestation.certify-on-honor".translate(buildContext, translationParams: {
-                  "name": attestation.name,
-                  "birthday": attestation.birthday,
-                  "address": attestation.address,
-                  "city": attestation.city,
-                  "zip": attestation.zip,
-                })),
-                SizedBox(height: 24.0),
-                ReasonWhy(
-                  buildContext: buildContext,
-                  attestation: attestation,
-                  reason: AttestationReason.work,
-                  checkedImage: checkedImage,
-                  uncheckedImage: uncheckedImage,
-                ),
-                SizedBox(height: 12.0),
-                ReasonWhy(
-                  buildContext: buildContext,
-                  attestation: attestation,
-                  reason: AttestationReason.food,
-                  checkedImage: checkedImage,
-                  uncheckedImage: uncheckedImage,
-                ),
-                SizedBox(height: 12.0),
-                ReasonWhy(
-                  buildContext: buildContext,
-                  attestation: attestation,
-                  reason: AttestationReason.health,
-                  checkedImage: checkedImage,
-                  uncheckedImage: uncheckedImage,
-                ),
-                SizedBox(height: 12.0),
-                ReasonWhy(
-                  buildContext: buildContext,
-                  attestation: attestation,
-                  reason: AttestationReason.family,
-                  checkedImage: checkedImage,
-                  uncheckedImage: uncheckedImage,
-                ),
-                SizedBox(height: 12.0),
-                ReasonWhy(
-                  buildContext: buildContext,
-                  attestation: attestation,
-                  reason: AttestationReason.sport,
-                  checkedImage: checkedImage,
-                  uncheckedImage: uncheckedImage,
-                ),
-                SizedBox(height: 36.0),
-                Align(
-                  alignment: Alignment.bottomRight,
+                Center(
                   child: Text(
-                    "viewer-attestation.check-in".translate(buildContext, translationParams: {
-                      "city": attestation.city,
-                      "date": DateTime.now().formatDDMMYYY(),
-                    }),
-                    textAlign: TextAlign.right,
+                    "viewer-attestation.title".translate(buildContext),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
+                ),
+                SizedBox(height: 8.0),
+                Text(
+                  "viewer-attestation.decree-application".translate(buildContext),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 8.0),
+                Text(
+                  "viewer-attestation.certify-on-honor".translate(buildContext, translationParams: {
+                    "name": attestation.name,
+                    "birthday": attestation.birthday,
+                    "birthplace": attestation.birthplace,
+                    "address": attestation.address,
+                    "city": attestation.city,
+                    "zip": attestation.zip,
+                  }),
+                ),
+                SizedBox(height: 24.0),
+                for (AttestationReason reason in AttestationReason.values)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: _ReasonWhy(
+                      buildContext: buildContext,
+                      attestation: attestation,
+                      reason: reason,
+                      checkedImage: checkedImage,
+                      uncheckedImage: uncheckedImage,
+                    ),
+                  ),
+                SizedBox(height: 12.0),
+                Text(
+                  "viewer-attestation.check-in".translate(buildContext, translationParams: {
+                    "city": attestation.city,
+                    "date": DateTime.now().formatDmyHm(),
+                  }),
                 ),
                 SizedBox(height: 12.0),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: SizedBox(
-                    child: Image(signatureImage),
-                    width: 150,
-                    height: 150,
-                  ),
+                SizedBox(
+                  child: Image(signatureImage),
+                  width: 125,
+                  height: 125,
                 ),
+                SizedBox(height: 4.0),
+                for(var index = 1; index <= 3; index++) Text('viewer-attestation.nota-bene.nb-${index}'.translate(buildContext)),
               ],
             ),
           );
@@ -135,14 +111,14 @@ class PdfGenerator {
   }
 }
 
-class ReasonWhy extends StatelessWidget {
+class _ReasonWhy extends StatelessWidget {
   final material.BuildContext buildContext;
   final Attestation attestation;
   final AttestationReason reason;
   final PdfImage checkedImage;
   final PdfImage uncheckedImage;
 
-  ReasonWhy({
+  _ReasonWhy({
     this.buildContext,
     this.attestation,
     this.reason,
@@ -166,7 +142,9 @@ class ReasonWhy extends StatelessWidget {
         Flexible(
           child: Text(
             "viewer-attestation.reason.${reason.toValueString()}".translate(buildContext),
-            style: TextStyle(fontWeight: (attestation.reason == reason) ? FontWeight.bold : FontWeight.normal),
+            style: TextStyle(
+              fontWeight: (attestation.reason == reason) ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         )
       ],
