@@ -7,7 +7,7 @@ import 'package:signature/signature.dart';
 
 class Preferences {
   static final String _signatureImageKey = "signature_image";
-  static final String _attestationKey = "attestation";
+  static final String _attestationKey = "attestation_v2";
 
   Preferences._();
 
