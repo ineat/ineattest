@@ -9,9 +9,10 @@ import 'package:ineattest/preferences/preferences.dart';
 import 'package:ineattest/views/about_page.dart';
 import 'package:ineattest/views/create_attestation.dart';
 import 'package:ineattest/views/divider.dart';
+import 'package:ineattest/views/qr_code.dart';
 import 'package:ineattest/views/signature.dart';
 import 'package:open_file/open_file.dart';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 class AttestationViewer extends HookWidget {
   @override
   Widget build(BuildContext context) {
@@ -80,14 +81,16 @@ class AttestationViewer extends HookWidget {
               },
               heroTag: "fab_fields",
             ),
-            HDivider8(),
-            FloatingActionButton(
-              child: Icon(Icons.share),
-              onPressed: () {
-                _share(context, attestationSnapshot.data);
-              },
-              heroTag: "fab_share",
-            )
+            if (!kIsWeb) ... [
+              HDivider8(),
+              FloatingActionButton(
+                child: Icon(Icons.share),
+                onPressed: () {
+                  _share(context, attestationSnapshot.data);
+                },
+                heroTag: "fab_share",
+              )
+            ]
           ],
         ),
       ),
@@ -127,6 +130,7 @@ class _AttestationContent extends StatelessWidget {
             ),
             Divider24(),
             Text("viewer-attestation.certify-on-honor".translate(context, translationParams: {
+              "lastName": attestation.lastName,
               "name": attestation.name,
               "birthday": attestation.birthday,
               "birthplace": attestation.birthplace,
@@ -155,10 +159,33 @@ class _AttestationContent extends StatelessWidget {
               }),
               textAlign: TextAlign.right,
             ),
-            Divider12(),
-            AspectRatio(
-              aspectRatio: 1,
-              child: Signature(editable: false),
+            if (!kIsWeb) ... [
+              Divider12(),
+              AspectRatio(
+                aspectRatio: 1,
+                child: Signature(editable: false),
+              ),
+            ],
+            Divider36(),
+            InkWell(
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Center(
+                  child: QRCode(
+                    attestation: attestation,
+                  ),
+                ),
+              ),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => QRCodePage(
+                      attestation: attestation,
+                    ),
+                    fullscreenDialog: true,
+                  ),
+                );
+              },
             ),
             Divider36(),
             ListView.separated(

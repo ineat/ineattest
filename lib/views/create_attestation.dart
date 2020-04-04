@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -16,6 +17,7 @@ class CreateAttestation extends HookWidget {
 
   // focus node
   final FocusNode _nameFocus = FocusNode();
+  final FocusNode _lastNameFocus = FocusNode();
   final FocusNode _birthdayFocus = FocusNode();
   final FocusNode _birthplaceFocus = FocusNode();
   final FocusNode _addressFocus = FocusNode();
@@ -23,12 +25,12 @@ class CreateAttestation extends HookWidget {
   final FocusNode _zipcodeFocus = FocusNode();
 
   // RegExp
-  final nameRegExp = RegExp(r"([^ ]{3,}) ([^ ]{3,})");
   final birthdayRegExp = RegExp(r"[0-9]{2}\/[0-9]{2}\/[0-9]{4}");
 
   @override
   Widget build(BuildContext context) {
     final nameTextEditingController = useTextEditingController();
+    final lastNameTextEditingController = useTextEditingController();
     final birthdayEditingController = useTextEditingController();
     final birthplaceEditingController = useTextEditingController();
     final addressEditingController = useTextEditingController();
@@ -43,6 +45,7 @@ class CreateAttestation extends HookWidget {
     final autoValidateForm = useState(false);
 
     useEffect(() {
+      lastNameTextEditingController.text = attestationSnapshot?.data?.lastName;
       nameTextEditingController.text = attestationSnapshot?.data?.name;
       addressEditingController.text = attestationSnapshot?.data?.address;
       cityEditingController.text = attestationSnapshot?.data?.city;
@@ -89,12 +92,25 @@ class CreateAttestation extends HookWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   TextFormField(
-                    controller: nameTextEditingController,
+                    controller: lastNameTextEditingController,
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
                       labelText: "create-attestation.sir-madam".translate(context),
                     ),
-                    validator: (value) => !nameRegExp.hasMatch(value) ? "create-attestation.error.sir-madam".translate(context) : null,
+                    validator: (value) => value.isEmpty ? "create-attestation.error.sir-madam".translate(context) : null,
+                    autocorrect: false,
+                    autofocus: true,
+                    textInputAction: TextInputAction.next,
+                    focusNode: _lastNameFocus,
+                    onFieldSubmitted: (_) => _nextFocus(context, _lastNameFocus, _nameFocus),
+                  ),
+                  TextFormField(
+                    controller: nameTextEditingController,
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                      labelText: "create-attestation.name".translate(context),
+                    ),
+                    validator: (value) => value.isEmpty ? "create-attestation.error.name".translate(context) : null,
                     autocorrect: false,
                     autofocus: true,
                     textInputAction: TextInputAction.next,
@@ -107,10 +123,13 @@ class CreateAttestation extends HookWidget {
                     decoration: InputDecoration(
                       labelText: "create-attestation.born-the".translate(context),
                     ),
-                    inputFormatters: [LengthLimitingTextInputFormatter(10)],
-                    onChanged: (_) {
-                      _onBirthdayChanged(oldBirthdayValue, birthdayEditingController);
-                    },
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(10),
+                      BirthdayInputFormatter(),
+                    ],
+//                    onChanged: (_) {
+//                      _onBirthdayChanged(oldBirthdayValue, birthdayEditingController);
+//                    },
                     validator: (value) => !birthdayRegExp.hasMatch(value) ? "create-attestation.error.born-the".translate(context) : null,
                     textInputAction: TextInputAction.next,
                     focusNode: _birthdayFocus,
@@ -190,16 +209,18 @@ class CreateAttestation extends HookWidget {
                     separatorBuilder: (_, __) => Divider12(),
                     itemCount: AttestationReason.values.length,
                   ),
-                  Divider12(),
-                  Text(
-                    "create-attestation.signature".translate(context),
-                    style: Theme.of(context).textTheme.subhead,
-                  ),
-                  Divider16(),
-                  AspectRatio(
-                    aspectRatio: 1,
-                    child: Signature(),
-                  ),
+                  if (!kIsWeb) ...[
+                    Divider12(),
+                    Text(
+                      "create-attestation.signature".translate(context),
+                      style: Theme.of(context).textTheme.subhead,
+                    ),
+                    Divider16(),
+                    AspectRatio(
+                      aspectRatio: 1,
+                      child: Signature(),
+                    ),
+                  ],
                   Divider16(),
                   FlatButton(
                     child: Text("action.validate".translate(context), style: TextStyle(color: Colors.white)),
@@ -236,12 +257,13 @@ class CreateAttestation extends HookWidget {
                         return;
                       }
 
-                      if (!(await Preferences.hasSignature())) {
+                      if (!kIsWeb && !(await Preferences.hasSignature())) {
                         displaySnackbarError("create-attestation.error.signature");
                         return;
                       }
 
                       final attestation = Attestation(
+                        lastName: lastNameTextEditingController.text,
                         name: nameTextEditingController.text,
                         birthday: birthdayEditingController.text,
                         birthplace: birthplaceEditingController.text,
@@ -290,6 +312,26 @@ class CreateAttestation extends HookWidget {
     oldBirthdayValue.value = newVal;
     birthdayEditingController.text = newVal;
     birthdayEditingController.selection = TextSelection.collapsed(offset: newVal.length);
+  }
+}
+
+class BirthdayInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    final newLength = newValue.text.length;
+    final oldLength = oldValue.text.length;
+    if (oldLength > newLength) {
+      return newValue;
+    }
+    if (newLength == 2 || newLength == 5) {
+      return TextEditingValue(
+        text: "${newValue.text}/",
+        selection: TextSelection.collapsed(
+          offset: newValue.selection.end + 1,
+        ),
+      );
+    }
+    return newValue;
   }
 }
 

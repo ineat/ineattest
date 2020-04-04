@@ -5,6 +5,7 @@ part 'attestation.jser.dart';
 
 class Attestation {
   final String name;
+  final String lastName;
   final String birthday;
   final String birthplace;
   final String zip;
@@ -15,6 +16,7 @@ class Attestation {
 
   Attestation({
     @required this.name,
+    @required this.lastName,
     @required this.birthday,
     @required this.birthplace,
     @required this.address,

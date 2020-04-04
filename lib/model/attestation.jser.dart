@@ -14,6 +14,7 @@ abstract class _$AttestationSerializer implements Serializer<Attestation> {
     if (model == null) return null;
     Map<String, dynamic> ret = <String, dynamic>{};
     setMapValue(ret, 'name', model.name);
+    setMapValue(ret, 'lastName', model.lastName);
     setMapValue(ret, 'birthday', model.birthday);
     setMapValue(ret, 'birthplace', model.birthplace);
     setMapValue(ret, 'zip', model.zip);
@@ -31,6 +32,7 @@ abstract class _$AttestationSerializer implements Serializer<Attestation> {
     if (map == null) return null;
     final obj = Attestation(
         name: map['name'] as String ?? getJserDefault('name'),
+        lastName: map['lastName'] as String ?? getJserDefault('lastName'),
         birthday: map['birthday'] as String ?? getJserDefault('birthday'),
         birthplace: map['birthplace'] as String ?? getJserDefault('birthplace'),
         address: map['address'] as String ?? getJserDefault('address'),

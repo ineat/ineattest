@@ -29,6 +29,7 @@ Vous devez donc imprimer (bouton partager qui vous fournira un PDF) l'attestatio
 * [Pdf](https://pub.dev/packages/pdf)
 * [Open file](https://pub.dev/packages/open_file)
 * [flutter i18n](https://pub.dev/packages/flutter_i18n)
+* [qr_flutter](https://pub.dev/packages/qr_flutter)
 
 # Aidez la recherche
 
